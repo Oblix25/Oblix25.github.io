@@ -1,0 +1,189 @@
+
+
+    Game Names:
+
+They Bleed
+Slime Bleeder
+Bleedout
+
+
+
+    Enemies
+
+
+Slime:
+
+-mid hp
+-moves around slow when not fighting
+-directly chases player when fighting
+-makes player move back
+
+
+fly slime:
+
+-lowest hp
+-flies
+-can give blood to allies
+-will explode soon after death damaging all
+-flits around in place when not fighting
+-flies above allies when fighting
+-make player want to kill fast
+
+
+Null Slime
+
+-can seep though walls
+-makes player move constant
+-makes player dread
+
+Multislime
+
+-spawns more slimes on death
+
+rage slime:
+
+-ww2 like fire spurt attack
+-high damage
+-uses health as ammo, quickly drained
+-doesn't move lul
+-gives player pause
+
+
+link slime:
+
+-ranged
+-uses host’s blood as ammo
+-will link to other slime if host dies
+-will try to re-link if link is cut
+-moves like Slime
+-makes player think about other slimes
+
+
+Wall Slime:
+
+-rock shield on one side
+-most weapons can't damage rock side
+-faces one direction, will change slowly if player gets behind
+-stays still
+-mid blood
+-gives player resistance
+
+
+Cube slime
+
+-big enough to fill a hall
+-slow
+-high blood
+-gives player no rest
+
+
+Srike slime
+
+-heard first
+-sprints on sight
+-makes player panic
+
+?sprint then sprays short range acid that weakens the player?
+?sprint and explode?
+?sprint and explode into spikes in a forward cone pattern??
+
+Solder Slime:
+
+-carries sharpened stone
+-looks intelligent
+-friendly fire to other slimes
+-makes player think
+?one glowing eye?
+
+
+all slimes go into weakened state after loosing too much blood
+
+
+
+    Combat
+
+:weapons:
+
+Spear
+  Stab:
+-mid ranged
+-1 cut
+-veryfast
+-no knockback
+
+  Lunge:
+-long range
+-2 cuts
+-mid speed
+-knockback
+-crouch, spinning in, then spinning out (look at fire emblem gifs)
+
+  Pole Vult
+-good horizontal boost
+-slight vertical boost
+?shift key?
+
+Pick
+-knockbacks
+-executes
+-if last hit was execute, then next hit is faster
+
+Javelin
+-thrown
+-2 Cuts
+-sticks in terrain and enemies
+-picked back up automatically
+-if jump is down while picking up, then player is boosted up
+-if yanked out of enemy, then execute
+RUNDOWN:
+3 javelins in bag
+hold right click
+char stops and plays aim stance
+point at wall
+depress right click
+2 javs in bag
+jav spawns and goes in an arc
+jav collides with wall
+jav is stuck in wall
+player jumps at wall
+player collides with jav
+jav is added to bag
+player is boosted up by jav
+
+Idea 1: one group for player weapons so just one collider needs to call their hit() functions, and one group to store player javs, javs are removed from group when thown and added when picked up
+
+Bomb
+-throwable
+-med explosion
+-stuns what doesn't kill
+
+*mechanics*
+
+Wounds/Cuts
+-blood spray
+-big blood spray on crit
+
+Crits
+-random chance to happen with some weapons
+-a low ammount of true damage added
+-can do special things for a few moments afterward
+
+?stop bleeding?
+?dash attack?
+
+Self bleeding
+
+Enemy Bleeding
+
+
+
+
+    Level Notes
+
+1. before introducing Blazer, have those same projectiles Fall though the ceiling as a trap, then one in an empty room later on
+2. no bottomless pits in first lvl, put some cliffs on 1st to warm up
+
+
+    Extra notes
+
+1. if your answer to "is [fav band] good?" is no, then fake blue screen

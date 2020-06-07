@@ -1,0 +1,43 @@
+{
+    "image": {
+        "title": "./assets/art/title.png",
+        "player": "./assets/sprites/player.png",
+        "player_att": "./assets/sprites/player_att",
+        "player_hold": "./assets/sprites/player_hold.png",
+        "hit": "./assets/sprites/hit.png",
+        "bullet": "./assets/sprites/bullet.png",
+        "crosshair": "./assets/sprites/crosshair.png",
+        "jav_aim": "./assets/sprites/jav_aim.png",
+        "eye": "./assets/sprites/eye.png",
+        "tiles": "./assets/tiles/industrial.v2.png",
+        "slime": "./assets/sprites/slime.png",
+        "pick": "./assets/sprites/pick.png",
+        "jav": "./assets/sprites/jav.png"
+    },
+
+    "atlas": {
+
+    },
+
+    "audio": {
+
+    },
+
+
+
+    "spritesheet": {
+
+    },
+
+
+
+  "spreadsheet": {
+
+  },
+
+  "tilemapTiledJSON": {
+    "map1": "./assets/maps/testmap.json",
+    "map2": "./assets/maps/testmap2.json",
+    "map3": "./assets/maps/testmap3.json"
+  }
+}
