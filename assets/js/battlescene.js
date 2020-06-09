@@ -86,8 +86,8 @@ export default class BattleScene extends Phaser.Scene
   setUpPointer(scene)
   {
 
-      scene.reticle = scene.physics.add.sprite(scene.player.player.y,scene.player.player.x, "crosshair");
-      scene.reticle.body.setAllowGravity(false)
+      //scene.reticle = scene.physics.add.sprite(scene.player.player.y,scene.player.player.x, "crosshair");
+      //scene.reticle.body.setAllowGravity(false)
 
       // Move reticle upon locked pointer move
       scene.input.on('pointermove', function (pointer) {
@@ -154,8 +154,8 @@ export default class BattleScene extends Phaser.Scene
   {
 
     this.player.update(time, delta, this);
-    this.reticle.body.velocity.x = this.player.player.body.velocity.x;
-    this.reticle.body.velocity.y = this.player.player.body.velocity.y;
+    //this.reticle.body.velocity.x = this.player.player.body.velocity.x;
+    //this.reticle.body.velocity.y = this.player.player.body.velocity.y;
 
   this.enemyGroup.children.entries.forEach(
     (child)=>{
@@ -177,7 +177,7 @@ export default class BattleScene extends Phaser.Scene
 
 
   this.checkStats.setText([
-    'current map:' + this.map.name 
+    'current map:' + this.map.name
   ]);
 
 

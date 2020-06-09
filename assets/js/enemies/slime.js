@@ -1,4 +1,4 @@
-
+import {State, StateMachine} from "../statemachine.js";
 
 
 export default class Slime extends Phaser.GameObjects.Sprite
@@ -8,6 +8,7 @@ export default class Slime extends Phaser.GameObjects.Sprite
     super(config.scene, config.x, config.y)
     this.setTexture("slime");
     this.setOrigin(0.5,0.5);
+    this.setTintFill(0x001110);
 
     //this.beenSeen = false;
     this.alive = true;
@@ -18,7 +19,7 @@ export default class Slime extends Phaser.GameObjects.Sprite
     this.weak = false;
     this.normSpeed = 50;
     this.runSpeed = 100;
-
+    this.awake = false;
 
     this.bleedTimerConfig = {
 
@@ -52,50 +53,60 @@ export default class Slime extends Phaser.GameObjects.Sprite
     config.scene.physics.world.enable(this);
     config.scene.add.existing(this);
     //config.scene.physics.world.collide(this, config.scene.midGround);
+
+    //set up StateMachine
+    this.slimeControl = new StateMachine( 'idle',
+      {
+        idle: new IdleState(),
+        chase: new ChaseState()
+      },
+      [config.scene, this]
+    );
   }
 
   update(time,delta)
   {
 
 
-    /*
-    if(!this.active) {
-      return;
-    }
-*/
 
-    //no fluids is fatal
-    if(this.blood < 1) { this.kill(); }
-
-    if(this.cuts > 0) {
-      this.blood--;
-      if(!this.bleedTimer.getProgress() > 0)
-      {
-        this.bleedTimer.reset(this.bleedTimerConfig);
-      }
-
+    if(!this.awake) {
+      this.checkActive();
     }else{
-      this.bleeding = false;
+
+          //no fluids is fatal
+          if(this.blood < 1) { this.kill(); }
+
+          if(this.cuts > 0) {
+            this.blood--;
+            if(!this.bleedTimer.getProgress() > 0)
+            {
+              this.bleedTimer.reset(this.bleedTimerConfig);
+            }
+
+          }else{
+            this.bleeding = false;
+          }
+
+          if(this.blood < this.maxBlood/2){
+            this.weak = true;
+            this.setTintFill();
+          }
+      /*
+          //emit the particals
+          if(this.bleeding) {
+            this.setAlpha(0.5);
+            this.blood--
+            if(this.blood < this.maxBlood/2){
+              this.weak = true;
+              this.setTintFill();
+            }
+          }
+      */
+          if(this.active){
+            this.bloodCheck.setText(['blood: ' + this.blood + "\ncuts: " + this.cuts + "\nbleeding: " + this.bleeding]).setX(this.x - 50).setY(this.y + -70);
+          }
     }
 
-    if(this.blood < this.maxBlood/2){
-      this.weak = true;
-      this.setTintFill();
-    }
-/*
-    //emit the particals
-    if(this.bleeding) {
-      this.setAlpha(0.5);
-      this.blood--
-      if(this.blood < this.maxBlood/2){
-        this.weak = true;
-        this.setTintFill();
-      }
-    }
-*/
-    if(this.active){
-      this.bloodCheck.setText(['blood: ' + this.blood + "\ncuts: " + this.cuts + "\nbleeding: " + this.bleeding]).setX(this.x - 50).setY(this.y + -70);
-    }
   }
 
   hurt(damage, exe) {
@@ -110,6 +121,15 @@ export default class Slime extends Phaser.GameObjects.Sprite
       this.cuts = this.cuts + damage;
       this.bleeding = true;
 
+  }
+
+  checkActive(){
+    if (this.x - 100 < this.scene.player.player.x && this.x + 100 > this.scene.player.player.x ){
+      if(this.y + 100 > this.scene.player.player.y && this.y - 100 < this.scene.player.player.y){
+        this.awake = true;
+        this.clearTint();
+      }
+    }
   }
 
   eed(damage=1, exe=false)
@@ -171,4 +191,28 @@ export default class Slime extends Phaser.GameObjects.Sprite
       return true;
   }
 */
+}
+
+//states
+
+class IdleState extends State {
+  enter(scene, slime){
+
+  }
+
+  execute(scene, slime){
+
+  }
+
+}
+
+class ChaseState extends IdleState {
+  enter(scene, slime){
+
+  }
+
+  execute(scene, slime){
+
+  }
+
 }
