@@ -38,6 +38,7 @@
   "tilemapTiledJSON": {
     "map1": "./assets/maps/testmap.json",
     "map2": "./assets/maps/testmap2.json",
-    "map3": "./assets/maps/testmap3.json"
+    "map3": "./assets/maps/testmap3.json",
+    "map4": "./assets/maps/testmap4.json"
   }
 }

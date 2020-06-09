@@ -28,6 +28,7 @@ export default class BattleScene extends Phaser.Scene
    this.start = this.registry.get('map1');
    this.second = this.registry.get('map2');
    this.third = this.registry.get("map3");
+   this.fourth = this.registry.get("map4");
 
 
 
@@ -63,22 +64,10 @@ export default class BattleScene extends Phaser.Scene
   .setDepth(30);
 
 
-/*
-  this.cylinderChanBullets = this.add.group({
-    classType: C
-  });
-*/
-/*
-  //player
-  this.player = spawnPlayer({
-    scene: this,
-    x: spawnpoints.x,
-    y: spawnpoints.y
-  });
-*/
   this.stuffConfig = {};
 
   this.playerGroup = this.add.group();
+  this.javelinBagGroup = this.add.group();
   this.enemyGroup = this.add.group();
   this.playerAttacks = this.add.group();
   this.enemyAttacks = this.add.group();
@@ -89,13 +78,7 @@ export default class BattleScene extends Phaser.Scene
 
   mapChange(this, this.second);
   this.setUpPointer(this);
-/*
-  this.player = new Player({
-    scene:this,
-    x: spawnPoint.x,
-    y: spawnPoint.y
-  });
-*/
+
 
 
 }
@@ -131,18 +114,6 @@ export default class BattleScene extends Phaser.Scene
         }
       }, scene);
 
-/*
-      // Locks pointer on mousedown (EDIT: it needs to point to the game object properly: OLD: I fiddled with it, adding "this." to some of the 'game.'s for this function and the next)
-      scene.game.canvas.addEventListener('mousedown', function () {
-          scene.input.mouse.requestPointerLock();
-      });
-
-      // Exit pointer lock when Q or escape (by default) is pressed.
-      scene.input.keyboard.on('keydown_Q', function (event) {
-        if (scene.input.mouse.locked)
-            scene.input.mouse.releasePointerLock();
-      }, 0, scene);
-*/
 
   }
 
@@ -153,6 +124,7 @@ export default class BattleScene extends Phaser.Scene
    let mapSwitch1 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE)
    let mapSwitch2 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO)
    let mapSwitch3 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE)
+   let mapSwitch4 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_FOUR)
 
    mapSwitch1.on("down", (key, event) => {
      mapChange(scene, scene.start);
@@ -164,6 +136,10 @@ export default class BattleScene extends Phaser.Scene
 
    mapSwitch3.on("down", (key, event) => {
      mapChange(scene, scene.third);
+   });
+
+   mapSwitch4.on("down", (key, event) => {
+     mapChange(scene, scene.fourth);
    });
 
 
@@ -180,13 +156,7 @@ export default class BattleScene extends Phaser.Scene
     this.player.update(time, delta, this);
     this.reticle.body.velocity.x = this.player.player.body.velocity.x;
     this.reticle.body.velocity.y = this.player.player.body.velocity.y;
-/*
-    this.playerGroup.getChildren(
-      (child) => {
-        child.update();
-      }
-    );
-*/
+
   this.enemyGroup.children.entries.forEach(
     (child)=>{
       if (child.active)
@@ -207,9 +177,7 @@ export default class BattleScene extends Phaser.Scene
 
 
   this.checkStats.setText([
-    'current map:' + this.map.name +
-    '\nthis pointer: ' + this.input.activePointer.worldX + " " + this.input.activePointer.worldY +
-    '\nplayerXY: ' + this.player.player.x + ' ' + this.player.player.y
+    'current map:' + this.map.name 
   ]);
 
 

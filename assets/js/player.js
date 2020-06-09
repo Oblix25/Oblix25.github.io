@@ -15,7 +15,7 @@ export default class Player {
        .sprite(x, y, "player", 0)
        .setOrigin(0.5,0.5);
     this.player.canJump = true;
-
+    this.player.javelinCount = 3;
     //set up StateMachine
     scene.statemachine = new StateMachine( 'idle',
       {
@@ -58,7 +58,8 @@ export default class Player {
     this.speedFollow(this.contLerp, scene);
 
     scene.checkPlayerStats.setText([
-      " player _state:    " + scene.statemachine.state
+      " player _state:    " + scene.statemachine.state +
+      "\nJavelins: "        + this.player.javelinCount
 
     ] );
   }
@@ -137,6 +138,10 @@ class IdleState extends State {
 
       //stab if x is pressed
 
+      if(!player.body.blocked.down){
+        scene.statemachine.transition('jump', true);
+      }
+
       if (x.isDown) {
         scene.statemachine.transition('stab');
         return;
@@ -192,7 +197,7 @@ class IdleState extends State {
 
 export class RunState extends State {
   enter(scene, player) {
-
+    player.setTexture('player');
 
   }
 
@@ -203,6 +208,9 @@ export class RunState extends State {
 
     //scene.input.keyboard.once("keydown-X", ()=> {this.stab(scene)}, this );
     //scene.input.keyboard.once("keydown-C", ()=> {this.pick(scene)}, this );
+    if(!player.body.blocked.down){
+      scene.statemachine.transition('jump', true);
+    }
 
     if(scene.input.activePointer.leftButtonDown() ){
         scene.statemachine.transition('aim');
@@ -252,6 +260,8 @@ export class RunState extends State {
       player.flipX = false;
     }
 
+
+
   }
 
 
@@ -297,22 +307,33 @@ class AimState extends State {
   execute(scene, player){
     const {} = scene.keys;
 
-    //right button released, throw jav
-    if(scene.input.activePointer.leftButtonReleased() ){
-      //if there's a jav in the javBag, then fire its throw function
-      let jav = new Javelin({
-        scene: scene
-      });
+    if(player.javelinCount >= 1) {
 
-      jav.fire({
-        x: player.x,
-        y: player.y,
-        targetX: scene.input.activePointer.worldX,
-        targetY: scene.input.activePointer.worldY
-      });
+            if(scene.input.activePointer.leftButtonReleased() ){
 
-      scene.statemachine.transition('idle');
+
+              let jav = new Javelin({
+                scene: scene
+              });
+
+              if (jav){                                                       //check if jave we created still exists
+                player.javelinCount--;                                          //and remove one jav from the bag
+                jav.fire({                                                    //abd fire it
+                  x: player.x,
+                  y: player.y,
+                  targetX: scene.input.activePointer.worldX,
+                  targetY: scene.input.activePointer.worldY
+                });
+              }
+
+              scene.statemachine.transition('idle');
+            }
+          //right button released, throw jav  //return to idle early if we don't have javelins in our bag
+    }else{
+      scene.statemachine.rewind();
     }
+
+
 
 
   }
@@ -383,13 +404,14 @@ class FlyState extends State {
 
 export class JumpState extends State {
 
-    enter(scene, player) {
+    enter(scene, player, nojump=false) {
       player.anims.stop();
-    if(scene.statemachine.stateStack[1] != 'stab')
-    {
-        player.setVelocityY(-400);
-    }
-
+      if(nojump == false){
+        if(scene.statemachine.stateStack[1] != 'stab')
+        {
+            player.setVelocityY(-400);
+        }
+      }
      player.canJump = false;
     }
 

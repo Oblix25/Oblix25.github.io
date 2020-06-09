@@ -16,7 +16,7 @@ export default class Javelin extends Phaser.GameObjects.Sprite
 
     //add collisions
     config.scene.physics.add.overlap(this, this.scene.enemyGroup, (jav, enemy) => jav.hit(enemy));
-    config.scene.physics.add.overlap(this, this.scene.midGround, (jav, ground) => jav.stuck() );
+    config.scene.physics.add.collider(this, this.scene.midGround, (jav, ground) => jav.stuck() );
 
     //stats
     this.TURN_RATE = 5; //turn rate in degrees per frame
@@ -72,8 +72,9 @@ export default class Javelin extends Phaser.GameObjects.Sprite
     const targetRot = Phaser.Math.Angle.Wrap( dir.angle());
 
     // Update the rotation smoothly.
-    if ( dir.x > 0.05) {
-      this.rotation = Phaser.Math.Linear(this.rotation, targetRot, step);
+    if ( dir.x > 0.05 || dir.x < -0.05) {
+      //  this.rotation = Phaser.Math.Linear(this.rotation, targetRot, step);
+      this.rotation = Phaser.Math.Angle.RotateTo(this.rotation, targetRot, step);
     }
   }
 
@@ -99,6 +100,7 @@ export default class Javelin extends Phaser.GameObjects.Sprite
 
       this.scene.statemachine.transition("jump");
       player.body.setVelocityY(-700);
+      player.javelinCount++;
 
       jav.pickUp(thing);
 

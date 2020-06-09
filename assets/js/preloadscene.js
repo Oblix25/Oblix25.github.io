@@ -179,6 +179,7 @@ createProgressbar (x, y)
     this.registry.set('map1', 'map1');
     this.registry.set('map2', 'map2');
     this.registry.set('map3', 'map3');
+    this.registry.set('map4', 'map4');
     this.registry.set('spawn', 'spawnCenter');
   }
 
