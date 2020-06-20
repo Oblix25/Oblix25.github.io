@@ -13,7 +13,8 @@ export default class Player {
     //physics body and animation
     this.player = scene.physics.add
        .sprite(x, y, "player", 0)
-       .setOrigin(0.5,0.5);
+       .setOrigin(0.5,0.5)
+       ;
     this.player.canJump = true;
     this.player.javelinCount = 3;
     //set up StateMachine

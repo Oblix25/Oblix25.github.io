@@ -67,12 +67,14 @@ export default class BattleScene extends Phaser.Scene
   this.stuffConfig = {};
 
   this.playerGroup = this.add.group();
-  this.javelinBagGroup = this.add.group();
+  //this.javelinBagGroup = this.add.group();
   this.enemyGroup = this.add.group();
   this.playerAttacks = this.add.group();
   this.enemyAttacks = this.add.group();
+  this.alarms = this.add.group();
 
-  this.physics.add.overlap(this.enemyGroup, this.playerAttacks, (enemy, attack) => attack.hit(enemy) );
+
+  //this.physics.add.overlap(this.enemyGroup, this.playerAttacks, (enemy, attack) => attack.hit(enemy) );
 
 
 
@@ -175,6 +177,14 @@ export default class BattleScene extends Phaser.Scene
     }
   );
 
+  this.alarms.children.entries.forEach(
+    (child)=>{
+      if (child.active)
+      {
+        child.update(this.player.player);
+      }
+    }
+  );
 
   this.checkStats.setText([
     'current map:' + this.map.name

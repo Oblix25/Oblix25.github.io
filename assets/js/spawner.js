@@ -12,6 +12,7 @@ function spawner(map, scene)
   //let enemyNum = 1;
   //let regName;
 
+
   //objects in map are checked by type(assigned in object layer in Tiled) and the appopriate extended sprite is created
 
     const objects = map.getObjectLayer('stuff'); //find the object layer in the tilemap named 'stuff'
@@ -42,7 +43,7 @@ function spawner(map, scene)
 
 
          //check the registry to see if the enemy has already been killed. If not create the enemy in the level and register it with the game
-         let regName = `_Enemy_${scene.enemyNum}`;
+         let regName = `_enemy_${scene.enemyNum}`;
          scene.registry.set(regName, 'active');
          scene.enemyNum += 1;
 
@@ -58,6 +59,8 @@ function spawner(map, scene)
                   scene: scene
                    });
 
+                 enemy.ID = regName;
+                 enemy.name = regName;
                  scene.enemyGroup.add(enemy);
                  scene.physics.add.collider(enemy, scene.midGround);
             }

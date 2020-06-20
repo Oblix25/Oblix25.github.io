@@ -1,4 +1,5 @@
-
+//import StuckJavelin from './stuckjavelin.js';
+import {StateMachine, State} from '../statemachine.js';
 
 export default class Javelin extends Phaser.GameObjects.Sprite
 {
@@ -9,14 +10,12 @@ export default class Javelin extends Phaser.GameObjects.Sprite
     this.setTexture("jav");
     this.setOrigin(0.5,0.5);
     this.setSize(20,20);
-    this.setDisplayOrigin(0.5,0.5);
+    //this.setDisplayOrigin(0.5,0.5);
     this.scene.physics.world.enable(this);
     this.scene.add.existing(this);
     this.scene.playerAttacks.add(this);
 
-    //add collisions
-    config.scene.physics.add.overlap(this, this.scene.enemyGroup, (jav, enemy) => jav.hit(enemy));
-    config.scene.physics.add.collider(this, this.scene.midGround, (jav, ground) => jav.stuck() );
+
 
     //stats
     this.TURN_RATE = 5; //turn rate in degrees per frame
@@ -24,11 +23,25 @@ export default class Javelin extends Phaser.GameObjects.Sprite
     this.DAMAGE = 1;    // how many cuts this will inflict to an enemy
     this.THROWTIME = 100;  // how long to accelerate in ms
     this.DIRECTION = 0;
+    this.ENEMYNAME;
+    this.collider1;
+    this.collider2;
+    this.overlap1;
+    this.THING;
+
+    this.javBrain = new StateMachine( 'fly',{
+      fly: new FlyState(),
+      stuck: new StuckState()
+    },
+    [this.scene, this]
+  );
+
   }
 
   update(time,delta)
   {
-     this.updateRotation(delta);
+
+     this.javBrain.step(delta);
   }
 
   fire(config)
@@ -78,49 +91,89 @@ export default class Javelin extends Phaser.GameObjects.Sprite
     }
   }
 
-  hit(thing=1)
+  hit(thing=0)
   {
     if(thing.alive)
     {
-      thing.hurt(2);
+      thing.hurt(1);
     }//else if( thing === )
-
-    this.stuck(thing);
+    this.THING = thing;
+    this.stuck();
   }
 
-  stuck(thing=1)
-  {
-
-    this.body.velocity.x = 0;
-    this.body.velocity.y = 0;
-    this.body.setAllowGravity(false);
-
-    // can be picked up now
-    this.scene.physics.add.overlap(this, this.scene.player.player, (jav, player) => {
-
-      this.scene.statemachine.transition("jump");
-      player.body.setVelocityY(-700);
-      player.javelinCount++;
-
-      jav.pickUp(thing);
-
-    });
-  }
-
-  pickUp(thing)
-  {
-    if(!thing===1){
+  pickUp(thing=0){
+    if(thing.alive){
       thing.hurt(1, true);
     }
     this.kill();
   }
 
+  stuck()
+  {
+
+
+        this.javBrain.transition('stuck');
+  }
+
   kill()
   {
     // Forget about this bullet
+    this.overlap1.destroy();
+    this.collider1.destroy();
     this.active = false;
     this.scene.playerAttacks.remove(this);
     this.destroy();
+  }
+
+}
+
+class FlyState extends State
+{
+  enter(scene, jav){
+
+    jav.body.setAllowGravity(true);
+    jav.overlap1 = scene.physics.add.overlap(jav, scene.enemyGroup, (jav, enemy) => {
+      if(jav.javBrain.state === 'fly') jav.hit(enemy)
+    });
+
+    jav.collider1 = scene.physics.add.collider(jav, scene.midGround, (jav, ground) => jav.stuck() );
+  }
+
+  execute(scene, jav, delta){
+    jav.updateRotation(delta);
+  }
+}
+
+class StuckState extends State
+{
+  enter(scene, jav){
+    jav.body.setVelocityX(0);                                                               // stop jav from moving
+    jav.body.setVelocityY(0);
+    jav.body.setAllowGravity(false);
+
+    jav.overlap2 = scene.physics.add.overlap(jav, scene.player.player, (jav, player) => {   //player pulls out jav and flipps up when touching
+
+          jav.scene.statemachine.transition("jump");
+          player.body.setVelocityY(-700);
+          player.javelinCount++;
+          jav.pickUp(jav.THING);
+        });
+  }
+
+  execute(scene, jav){
+
+
+    if(jav.THING){
+      if (scene.children.getByName(`${jav.THING.name}`)){
+        const enemy = scene.children.getByName(`${jav.THING.name}`);
+        jav.body.velocity.x = enemy.body.velocity.x;                                          // move jav with it if so
+        jav.body.velocity.y = enemy.body.velocity.y;
+      }else{
+        jav.javBrain.rewind();
+        jav.THING = 0;
+      }                                                                  // check if thing jav is stuck in is fleash and blood
+    }
+
   }
 
 }

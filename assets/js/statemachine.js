@@ -13,7 +13,7 @@ export class StateMachine {
     }
   }
 
-  step() {
+  step(...stepArgs) {
     // On the first step, the state is null and we need to initialize the first state.
     if (this.state === null) {
       this.state = this.initialState;
@@ -21,10 +21,12 @@ export class StateMachine {
     }
 
     // Run the current state's execute
-    this.possibleStates[this.state].execute(...this.stateArgs);
+    this.possibleStates[this.state].execute(...this.stateArgs, ...stepArgs);
   }
 
   transition(newState, ...enterArgs) {
+    //this.possibleStates[this.state].exit(...this.stateArgs);
+
     this.stateStack.unshift(newState);
     this.state = this.stateStack[0];
     this.stateStack.splice(3);
@@ -49,6 +51,10 @@ export class State {
   }
 
   execute() {
+
+  }
+
+  exit() {
 
   }
 }

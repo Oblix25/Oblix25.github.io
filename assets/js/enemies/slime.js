@@ -10,16 +10,22 @@ export default class Slime extends Phaser.GameObjects.Sprite
     this.setOrigin(0.5,0.5);
     this.setTintFill(0x001110);
 
-    //this.beenSeen = false;
+    config.scene.physics.world.enable(this);
+    config.scene.add.existing(this);
+
     this.alive = true;
-    this.maxBlood = 239;
+    this.ID;
+    this.maxBlood = 220;
     this.blood = 220;
     this.bleeding = false;
     this.cuts = 0;
     this.weak = false;
     this.normSpeed = 50;
     this.runSpeed = 100;
-    this.awake = false;
+    this.active = false;
+  //  this.touching = !this.body.touching.none;
+  //  this.wasTouching = !this.body.wasTouching.none;
+
 
     this.bleedTimerConfig = {
 
@@ -50,12 +56,52 @@ export default class Slime extends Phaser.GameObjects.Sprite
       .setDepth(30);
 
 
-    config.scene.physics.world.enable(this);
-    config.scene.add.existing(this);
-    //config.scene.physics.world.collide(this, config.scene.midGround);
+    this.alarm = new Alarm({                            // set up alarm to activate enemy when close
+        x: config.x,
+        y: config.y,
+        scene: config.scene,
+        enemy: this,
+
+    });
+
+
+
+    this.sightLine = this.scene.add.line({                                 // set up line of sight
+      x1: this.x,
+      y1: this.y,
+      x2: config.scene.player.x,
+      y2: config.scene.player.y
+    }).setOrigin(0,0);//.setLineWidth(5);
+
+    //this.slimeGraphics = this.scene.add.graphics().lineStyle(5, 0xFF0000, 1.0);                        //call this when using sightLine
+
+    this.slimeGraphics = this.scene.add.line().setOrigin(0.5,0.5);
+
+    config.scene.physics.world.enable(this.slimeGraphics);
+    this.slimeGraphics.body.setAllowGravity(false);
+
+    this.slimeGraphics.on('overlapstart', () => {
+      this.slimeControl.transition('idle');
+      this.slimeGraphics.setStrokeStyle(5, 0xFF0030, 0.5);
+    }, this);
+
+    this.slimeGraphics.on('overlapend', () => {
+      this.slimeControl.transition('chase');
+      this.slimeGraphics.setStrokeStyle(5, 0xFF0000, 1.0);
+    }, this);
+
+    this.slimeGraphics.on('overlaping', ()=> {
+      this.slimeControl.transition('idle');
+      this.slimeGraphics.setStrokeStyle(5, 0xFF0030, 0.5);
+    },this);
+
+    this.slimeGraphics.on('notoverlaping', ()=> {
+        this.slimeControl.transition('chase');
+        this.slimeGraphics.setStrokeStyle(5, 0xFF0000, 1.0);
+    },this);
 
     //set up StateMachine
-    this.slimeControl = new StateMachine( 'idle',
+    this.slimeControl = new StateMachine( 'chase',
       {
         idle: new IdleState(),
         chase: new ChaseState()
@@ -69,9 +115,7 @@ export default class Slime extends Phaser.GameObjects.Sprite
 
 
 
-    if(!this.awake) {
-      this.checkActive();
-    }else{
+
 
           //no fluids is fatal
           if(this.blood < 1) { this.kill(); }
@@ -89,7 +133,7 @@ export default class Slime extends Phaser.GameObjects.Sprite
 
           if(this.blood < this.maxBlood/2){
             this.weak = true;
-            this.setTintFill();
+            this.setTintFill('white');
           }
       /*
           //emit the particals
@@ -102,10 +146,21 @@ export default class Slime extends Phaser.GameObjects.Sprite
             }
           }
       */
-          if(this.active){
-            this.bloodCheck.setText(['blood: ' + this.blood + "\ncuts: " + this.cuts + "\nbleeding: " + this.bleeding]).setX(this.x - 50).setY(this.y + -70);
-          }
-    }
+
+
+    //  if(Phaser.Physics.Arcade.Tilemap.TileIntersectsBody(this.scene.midGround, this.slimeGraphics.body)) {
+    //    this.slimeGraphics.body.embedded = true;
+    //  }else{
+    //    this.slimeGraphics.body.embedded = false;
+    //  }
+      if(this.active){
+        this.updateLOS();                                    //handles the movment and overlap of sightLine for each frame
+        this.slimeControl.step();
+        this.bloodCheck.setText(['blood: ' + this.blood + "\ncuts: " + this.cuts + "\nbleeding: " + this.bleeding + '\nstate: ' + this.slimeControl.state]).setX(this.x - 50).setY(this.y + -90);
+
+      }
+
+
 
   }
 
@@ -123,49 +178,49 @@ export default class Slime extends Phaser.GameObjects.Sprite
 
   }
 
-  checkActive(){
-    if (this.x - 100 < this.scene.player.player.x && this.x + 100 > this.scene.player.player.x ){
-      if(this.y + 100 > this.scene.player.player.y && this.y - 100 < this.scene.player.player.y){
-        this.awake = true;
-        this.clearTint();
+  updateLOS(){
+
+    var tilesInSight = this.scene.midGround.getTilesWithinShape(this.slimeGraphics.geom);
+    var isWallThere = false;
+    var i;
+
+    for (i=0; i < tilesInSight.length; i++){
+      if(tilesInSight[i].collideRight == true){
+        isWallThere = true;
+        break;
       }
     }
-  }
 
-  eed(damage=1, exe=false)
-  {
-    if (exe === true && this.weak ===true) this.kill;
-    this.cuts = this.cuts + damage;
-    this.scene.time.addEvent({delay: 2000, callback: ()=> this.cuts = this.cuts - 1, callbackScope: this});
-  }
-
-  leed(damage=1) {
-
-    if(!this.bleeding) this.bleeding = true;
-
-    if(damage === 1){
-        this.cuts = this.cuts + 1;
-        this.scene.time.addEvent({delay: 500, repeatCount: 4, callback: bloodLoss, callbackScope: this, loop: true});
-        this.scene.time.addEvent({delay: 2000, callback: ()=> {this.cuts = this.cuts - 1; this.bleeding = false}, callbackScope: this});
-
-        function bloodLoss() {
-          if(this.cuts > 0){
-            this.blood = this.blood - 10;
-          }
-        }
+    if(!isWallThere) {
+      this.slimeGraphics.body.embedded = false;
+    }else{
+      this.slimeGraphics.body.embedded = true;
     }
-  //  this.scene.time.delayedCall(300, )
+
+    if (this.slimeGraphics.body.embedded) this.slimeGraphics.body.touching.none = false;
+
+    var touching = !this.slimeGraphics.body.touching.none;
+    var wasTouching = !this.slimeGraphics.body.wasTouching.none;
+
+
+    if (touching && !wasTouching) this.slimeGraphics.emit("overlapstart");
+    else if (!touching && wasTouching) this.slimeGraphics.emit("overlapend");
+
+    this.slimeGraphics.setTo(this.x, this.y, this.scene.player.player.x, this.scene.player.player.y);
+
   }
 
   clearDebug(){
     this.bloodCheck.destroy();
+    this.alarm.destroy();
+    this.slimeGraphics.destroy();
+    this.scene.registry.remove(`${this.ID}`);
   }
 
   kill() {
       // Forget about this enemy
-      this.active = false;
       this.clearDebug();
-      //this.scene.enemyGroup.remove(this);
+      this.active = false;
       this.destroy();
   }
 /*
@@ -197,7 +252,8 @@ export default class Slime extends Phaser.GameObjects.Sprite
 
 class IdleState extends State {
   enter(scene, slime){
-
+    slime.setTexture("slime");
+    slime.body.setVelocityX(0);
   }
 
   execute(scene, slime){
@@ -212,6 +268,40 @@ class ChaseState extends IdleState {
   }
 
   execute(scene, slime){
+    if(slime){
+      this.chase(scene, slime);
+    }
+  }
+
+  chase(scene, slime){
+    if(scene.player.player.x > slime.x){
+      slime.body.setVelocityX(slime.runSpeed);
+    }else{
+      slime.body.setVelocityX(-slime.runSpeed);
+    }
+  }
+
+}
+
+ class Alarm extends Phaser.GameObjects.GameObject{
+  constructor(config){
+    super(config.scene, config.enemy, config.x, config.y);
+    config.scene.alarms.add(this);
+    this.scene = config.scene;
+    this.enemy = config.enemy;
+    this.x = config.x;
+    this.y = config.y;
+
+  }
+
+  update(player){
+    if (this.x - 500 < player.x && this.x + 500 > player.x ){
+      if(this.y + 500 > player.y && this.y - 500 < player.y){
+        this.enemy.setActive(true);
+        this.enemy.clearTint();
+
+      }
+    }
 
   }
 

@@ -3,6 +3,9 @@ import {spawner} from './spawner.js';
 function mapChange(scene, mapinput)
 {
 
+  if(scene.enemyNum) scene.enemyNum = 0;
+  scene.registry.reset();
+
   if (scene.playerGroup) scene.playerGroup.clear(true, true);
 
   if (scene.playerAttacks) {
@@ -10,7 +13,7 @@ function mapChange(scene, mapinput)
   }
 
   if (scene.enemyGroup) {
-    scene.enemyGroup.children.entries.forEach( (enemy)=>enemy.clearDebug() );
+    scene.enemyGroup.children.entries.forEach( (enemy)=>{enemy.clearDebug(); enemy.kill(); });
     scene.enemyGroup.clear(true, true);
   }
   //if (scene.enemyNum) scene.enemyNum = 0;
