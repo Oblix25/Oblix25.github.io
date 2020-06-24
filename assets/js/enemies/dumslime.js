@@ -8,6 +8,7 @@ export default class DumSlime extends Slime {
     this.att = 0;
     this.normSpeed = 0;
     this.runSpeed = 0;
+    this.pickupSpeed = 0;
   }
 
 

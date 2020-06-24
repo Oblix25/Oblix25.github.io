@@ -13,7 +13,20 @@ export default class Pick extends Phaser.GameObjects.Sprite
     scene.physics.world.enable(this);
     scene.add.existing(this);
     this.body.setAllowGravity(false);
-    scene.physics.add.overlap(this, scene.enemyGroup, (pick, enemy) => pick.hit(enemy));
+    this.knockback = 400;
+    scene.physics.add.overlap(this, scene.enemyGroup, (pick, enemy) => {
+      enemy.slimeControl.transition('knockback');
+      if (scene.player.player)
+      {
+        if(scene.player.player.flipX == false){
+            enemy.body.setVelocityX(this.knockback);
+        }else{
+          enemy.body.setVelocityX(-this.knockback);
+        }
+      }
+      pick.hit(enemy)
+
+    });
 /*
     this.swingTime = new TimerEvent({
       delay: 30,

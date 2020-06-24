@@ -1,4 +1,5 @@
 import {State, StateMachine} from "../statemachine.js";
+import {EnemyEdge, Edge} from "../projectiles/edge.js";
 
 
 export default class Slime extends Phaser.GameObjects.Sprite
@@ -23,6 +24,8 @@ export default class Slime extends Phaser.GameObjects.Sprite
     this.normSpeed = 50;
     this.runSpeed = 100;
     this.active = false;
+    this.pickupSpeed = 600;
+    //this.body.setMaxVelocity(100);
   //  this.touching = !this.body.touching.none;
   //  this.wasTouching = !this.body.wasTouching.none;
 
@@ -104,7 +107,9 @@ export default class Slime extends Phaser.GameObjects.Sprite
     this.slimeControl = new StateMachine( 'chase',
       {
         idle: new IdleState(),
-        chase: new ChaseState()
+        chase: new ChaseState(),
+        attack: new AttackState(),
+        knockback: new KnockedState()
       },
       [config.scene, this]
     );
@@ -148,12 +153,8 @@ export default class Slime extends Phaser.GameObjects.Sprite
       */
 
 
-    //  if(Phaser.Physics.Arcade.Tilemap.TileIntersectsBody(this.scene.midGround, this.slimeGraphics.body)) {
-    //    this.slimeGraphics.body.embedded = true;
-    //  }else{
-    //    this.slimeGraphics.body.embedded = false;
-    //  }
       if(this.active){
+
         this.updateLOS();                                    //handles the movment and overlap of sightLine for each frame
         this.slimeControl.step();
         this.bloodCheck.setText(['blood: ' + this.blood + "\ncuts: " + this.cuts + "\nbleeding: " + this.bleeding + '\nstate: ' + this.slimeControl.state]).setX(this.x - 50).setY(this.y + -90);
@@ -268,19 +269,51 @@ class ChaseState extends IdleState {
   }
 
   execute(scene, slime){
-    if(slime){
+
       this.chase(scene, slime);
-    }
+      if(slime.body.velocity.x > slime.runSpeed){
+        slime.body.velocity.x = slime.runSpeed;
+      }else if(slime.body.velocity.x < -slime.runSpeed){
+        slime.body.velocity.x = -slime.runSpeed;
+      }
+
   }
 
   chase(scene, slime){
-    if(scene.player.player.x > slime.x){
-      slime.body.setVelocityX(slime.runSpeed);
-    }else{
-      slime.body.setVelocityX(-slime.runSpeed);
+    if(scene.player.player.x - 30 > slime.x ){
+      slime.body.setAccelerationX(slime.pickupSpeed);
+    }else if(scene.player.player.x + 30 < slime.x){
+      slime.body.setAccelerationX(-slime.pickupSpeed);
     }
   }
 
+}
+
+class AttackState extends IdleState {
+  enter(scene, slime){
+
+  }
+
+  execute(scene, slime){
+
+  }
+}
+
+class KnockedState extends IdleState {
+  enter(scene, slime){
+
+    scene.time.delayedCall({
+      delay: 1000,
+      callback: () => {
+        slime.slimeControl.rewind();
+      },
+      callbackScope: this
+    });
+  }
+
+  execute(scene, slime){
+
+  }
 }
 
  class Alarm extends Phaser.GameObjects.GameObject{
