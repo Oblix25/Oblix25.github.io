@@ -29,6 +29,14 @@ export default class Slime extends Phaser.GameObjects.Sprite
   //  this.touching = !this.body.touching.none;
   //  this.wasTouching = !this.body.wasTouching.none;
 
+    this.knockbackTimerConfig = {
+
+          delay: 100,
+          callback: () => {
+            this.slimeControl.rewind();
+          },
+          callbackScope: this
+    };
 
     this.bleedTimerConfig = {
 
@@ -158,6 +166,7 @@ export default class Slime extends Phaser.GameObjects.Sprite
         this.updateLOS();                                    //handles the movment and overlap of sightLine for each frame
         this.slimeControl.step();
         this.bloodCheck.setText(['blood: ' + this.blood + "\ncuts: " + this.cuts + "\nbleeding: " + this.bleeding + '\nstate: ' + this.slimeControl.state]).setX(this.x - 50).setY(this.y + -90);
+        if(this.knockTimer) this.bloodCheck.setText([ this.knockTimer.getProgress()]);
 
       }
 
@@ -271,6 +280,7 @@ class ChaseState extends IdleState {
   execute(scene, slime){
 
       this.chase(scene, slime);
+
       if(slime.body.velocity.x > slime.runSpeed){
         slime.body.velocity.x = slime.runSpeed;
       }else if(slime.body.velocity.x < -slime.runSpeed){
@@ -299,16 +309,20 @@ class AttackState extends IdleState {
   }
 }
 
-class KnockedState extends IdleState {
+class KnockedState {
   enter(scene, slime){
 
-    scene.time.delayedCall({
-      delay: 1000,
-      callback: () => {
-        slime.slimeControl.rewind();
-      },
-      callbackScope: this
-    });
+    slime.knockTimer = scene.time.delayedCall( 100, () => slime.slimeControl.rewind(), [], this );
+/*
+   slime.knockTimer = scene.time.delayedCall({
+
+
+     callback: () => {
+       this.slimeControl.rewind();
+     },
+     delay: 100,
+     callbackScope: slime
+   });*/
   }
 
   execute(scene, slime){
