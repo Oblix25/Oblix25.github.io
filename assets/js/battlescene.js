@@ -70,7 +70,7 @@ export default class BattleScene extends Phaser.Scene
   //this.javelinBagGroup = this.add.group();
   this.enemyGroup = this.add.group();
   this.playerAttacks = this.add.group();
-  this.enemyAttacks = this.add.group();
+  this.enemyBullets = this.add.group();
   this.alarms = this.add.group();
 
 
@@ -187,7 +187,8 @@ export default class BattleScene extends Phaser.Scene
   );
 
   this.checkStats.setText([
-    'current map:' + this.map.name
+    'current map:' + this.map.name +
+    '\nplayer blood: ' + this.player.player.blood
   ]);
 
 

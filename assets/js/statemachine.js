@@ -25,8 +25,8 @@ export class StateMachine {
   }
 
   transition(newState, ...enterArgs) {
-    //this.possibleStates[this.state].exit(...this.stateArgs);
 
+    this.possibleStates[this.state].exit(...this.stateArgs);
     this.stateStack.unshift(newState);
     this.state = this.stateStack[0];
     this.stateStack.splice(3);
@@ -38,6 +38,7 @@ export class StateMachine {
 
       if(this.stateStack[1]){           //check if there's even a state to switch to
 
+        this.possibleStates[this.state].exit(...this.stateArgs);
         this.stateStack.unshift(this.stateStack[1]);         //if so, pop out the current state and switch to the new one
         this.state = this.stateStack[0];
         this.possibleStates[this.state].enter(...this.stateArgs);

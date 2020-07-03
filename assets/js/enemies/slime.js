@@ -1,5 +1,5 @@
 import {State, StateMachine} from "../statemachine.js";
-import {EnemyEdge, Edge} from "../projectiles/edge.js";
+import Bite from "../projectiles/enemyBullets.js";
 
 
 export default class Slime extends Phaser.GameObjects.Sprite
@@ -14,20 +14,33 @@ export default class Slime extends Phaser.GameObjects.Sprite
     config.scene.physics.world.enable(this);
     config.scene.add.existing(this);
 
+    //things to check
     this.alive = true;
+    this.active = false;
     this.ID;
-    this.maxBlood = 220;
+    this.bite;
     this.blood = 220;
     this.bleeding = false;
     this.cuts = 0;
     this.weak = false;
+    this.canAttack = true;
+
+    //stats to use
+    this.maxBlood = 220;
     this.normSpeed = 50;
     this.runSpeed = 100;
-    this.active = false;
     this.pickupSpeed = 600;
+    this.attackRange = 100;
+    this.strength = 25;                          //determines damage when used as attack arg
+    this.windUp = 300;                          //time it takes for slime to let out attack
+    this.recovery = 600;                        //time it takes for slime to return to movement state
+    this.attackInterval = this.recovery + this.recovery/2;                  //time it takes for slime to ready another attack
+
+
     //this.body.setMaxVelocity(100);
   //  this.touching = !this.body.touching.none;
   //  this.wasTouching = !this.body.wasTouching.none;
+
 
     this.knockbackTimerConfig = {
 
@@ -38,7 +51,7 @@ export default class Slime extends Phaser.GameObjects.Sprite
           callbackScope: this
     };
 
-    this.bleedTimerConfig = {
+    this.bleedTimerConfig = {                    //how long it takes for a cut to heal
 
         delay: 2000,
         callback: () => {
@@ -53,6 +66,20 @@ export default class Slime extends Phaser.GameObjects.Sprite
         },
         callbackScope: this
     };
+
+    this.attackTimerConfig = {
+
+        delay: this.attackInterval,
+        callback: () => {
+            this.canAttack = true;
+            if (this.canAttack = true){
+              this.attackTimer.paused = true;
+            }
+        },
+        callbackScope: this
+    };
+
+    this.attackTimer = config.scene.time.delayedCall(this.attackTimerConfig);
 
     this.bleedTimer = config.scene.time.delayedCall(this.bleedTimerConfig);
 
@@ -221,8 +248,10 @@ export default class Slime extends Phaser.GameObjects.Sprite
   }
 
   clearDebug(){
+    this.bloodCheck.setText(' ');
     this.bloodCheck.destroy();
     this.alarm.destroy();
+    this.slimeGraphics.setAlpha(0);
     this.slimeGraphics.destroy();
     this.scene.registry.remove(`${this.ID}`);
   }
@@ -264,9 +293,14 @@ class IdleState extends State {
   enter(scene, slime){
     slime.setTexture("slime");
     slime.body.setVelocityX(0);
+    slime.body.setAccelerationX(0);
   }
 
   execute(scene, slime){
+
+  }
+
+  exit(){
 
   }
 
@@ -277,23 +311,46 @@ class ChaseState extends IdleState {
 
   }
 
-  execute(scene, slime){
-
-      this.chase(scene, slime);
-
-      if(slime.body.velocity.x > slime.runSpeed){
-        slime.body.velocity.x = slime.runSpeed;
-      }else if(slime.body.velocity.x < -slime.runSpeed){
-        slime.body.velocity.x = -slime.runSpeed;
-      }
+  exit(){
 
   }
 
+  execute(scene, slime){
+
+      this.chase(scene, slime);
+      this.checkAttack(scene, slime);
+
+
+  }
+
+  checkAttack(scene, slime){
+    if(scene.player.player.y - slime.attackRange < slime.y && scene.player.player.y + slime.attackRange > slime.y){
+      if(scene.player.player.x - slime.attackRange < slime.x && scene.player.player.x + slime.attackRange > slime.x){
+        if(slime.canAttack == true) slime.slimeControl.transition('attack');
+      }
+    }
+
+  }
+
+  exit(scene, slime){
+    slime.body.setAccelerationX(0);
+  }
+
   chase(scene, slime){
+
+    //make slime attack if in range //slime.attackRange
+
+
     if(scene.player.player.x - 30 > slime.x ){
       slime.body.setAccelerationX(slime.pickupSpeed);
     }else if(scene.player.player.x + 30 < slime.x){
       slime.body.setAccelerationX(-slime.pickupSpeed);
+    }
+
+    if(slime.body.velocity.x > slime.runSpeed){
+      slime.body.velocity.x = slime.runSpeed;
+    }else if(slime.body.velocity.x < -slime.runSpeed){
+      slime.body.velocity.x = -slime.runSpeed;
     }
   }
 
@@ -301,10 +358,44 @@ class ChaseState extends IdleState {
 
 class AttackState extends IdleState {
   enter(scene, slime){
+    slime.body.setVelocityX(0);
+    let attackLeft;
+    slime.canAttack = false;
+    if(scene.player.player.x > slime.x)
+    {
+      attackLeft = false;
+    }else{
+      attackLeft = true;
+    }
+    scene.time.delayedCall(slime.windUp, () => {
+      if(slime.slimeControl.state = "attack") this.attack(scene, slime, attackLeft); }, [], this );
+
+
+    scene.time.delayedCall(slime.recovery, () => {
+      if(slime.slimeControl.state = "attack") slime.slimeControl.rewind(); }, [], this);
+
+
+    scene.time.delayedCall(slime.attackInterval, () => slime.canAttack = true, [], this);
+
+  }
+
+  exit(){
 
   }
 
   execute(scene, slime){
+
+  }
+
+  attack(scene, slime, attackLeft){
+    slime.bite.swing({
+      scene: scene,
+      x: slime.x,
+      y: slime.y,
+      goLeft: attackLeft
+    });
+
+    slime.attackTimer.reset();
 
   }
 }
@@ -323,6 +414,10 @@ class KnockedState {
      delay: 100,
      callbackScope: slime
    });*/
+  }
+
+  exit(){
+
   }
 
   execute(scene, slime){

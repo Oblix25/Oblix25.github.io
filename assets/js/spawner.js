@@ -2,8 +2,9 @@ import Player from "./player.js";
 import Slime from "./enemies/slime.js";
 import DumSlime from "./enemies/dumslime.js"
 import Pick from "./projectiles/pick.js";
-import {Edge, EnemyEdge} from "./projectiles/edge.js";
+import Edge from "./projectiles/edge.js";
 import Javelin from "./projectiles/javelin.js";
+import Bite from "./projectiles/enemybullets.js";
 
 
 function spawner(map, scene)
@@ -63,6 +64,13 @@ function spawner(map, scene)
                  enemy.name = regName;
                  scene.enemyGroup.add(enemy);
                  scene.physics.add.collider(enemy, scene.midGround);
+
+                 let enemyBite = new Bite({
+                   scene: scene,
+                   damage: enemy.strength
+                 });
+
+                 enemy.bite = enemyBite;
             }
 
             if (object.name === 'dumslime'){

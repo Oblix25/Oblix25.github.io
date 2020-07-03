@@ -12,9 +12,16 @@ function mapChange(scene, mapinput)
     scene.playerAttacks.clear(true, true);
   }
 
+
+
   if (scene.enemyGroup) {
-    scene.enemyGroup.children.entries.forEach( (enemy)=>{enemy.clearDebug(); enemy.kill(); });
+    scene.enemyGroup.children.entries.forEach( (enemy)=>{enemy.kill(); });
     scene.enemyGroup.clear(true, true);
+  }
+
+  if(scene.enemyBullets) {
+      scene.enemyGroup.children.entries.forEach( (enemy)=>{enemy.active = false; });
+    scene.enemyBullets.clear(true, true);
   }
   //if (scene.enemyNum) scene.enemyNum = 0;
 

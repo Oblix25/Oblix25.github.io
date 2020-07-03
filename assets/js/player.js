@@ -1,5 +1,6 @@
 import {State, StateMachine} from "./statemachine.js";
 import Javelin from "./projectiles/javelin.js";
+import {mapChange} from "./mapchange.js";
 
 export default class Player {
 
@@ -15,8 +16,16 @@ export default class Player {
        .sprite(x, y, "player", 0)
        .setOrigin(0.5,0.5)
        ;
+
+
     this.player.canJump = true;
     this.player.javelinCount = 3;
+    this.player.blood = 100;
+
+    this.player.hurt = function(damage=1, cuts){
+      this.blood -= damage;
+    }
+
     //set up StateMachine
     scene.statemachine = new StateMachine( 'idle',
       {
@@ -54,6 +63,8 @@ export default class Player {
   {
     const {statemachine, speedFollow} = this;
 
+    if(this.player.blood <= 0) this.playerDies(scene);
+
     scene.statemachine.step();
 
     this.speedFollow(this.contLerp, scene);
@@ -65,8 +76,12 @@ export default class Player {
     ] );
   }
 
-  //makes the camera try to catch up with the player
 
+  playerDies(scene){                                             //what happens when player blood is reduced to 0
+    mapChange(scene, 'map1');
+  }
+
+  //makes the camera try to catch up with the player
   speedFollow(conLerp, scene)
   {
 
@@ -114,6 +129,10 @@ export default class Player {
 
   }
 
+hurt(damage=1, cuts){
+  this.player.blood -= damage;
+}
+
 setPlayerAnimations(scene){
 
   scene.anims.create({
@@ -132,6 +151,10 @@ class IdleState extends State {
     enter(scene, player) {
       player.setVelocity(0);
       player.setTexture("player");
+    }
+
+    exit(){
+
     }
 
     execute(scene, player) {
@@ -265,6 +288,9 @@ export class RunState extends State {
 
   }
 
+  exit(){
+
+  }
 
 }
 
@@ -297,12 +323,20 @@ class StabState extends State {
 
   }
 
+  exit(){
+
+  }
+
 }
 
 class AimState extends State {
   enter(scene, player){
     player.setTexture("player_hold");
     player.setVelocity(0);
+  }
+
+  exit(){
+
   }
 
   execute(scene, player){
@@ -353,11 +387,19 @@ class PickState extends State {
 
   }
 
+  exit(){
+
+  }
+
 }
 
 class FlyState extends State {
   enter(scene, player){
     player.body.setAllowGravity(false);
+  }
+
+  exit(){
+
   }
 
   execute(scene, player){
@@ -414,6 +456,10 @@ export class JumpState extends State {
         }
       }
      player.canJump = false;
+    }
+
+    exit(){
+
     }
 
     execute(scene, player) {
