@@ -1,5 +1,4 @@
 import {State, StateMachine} from "../statemachine.js";
-import Bite from "../projectiles/enemyBullets.js";
 
 
 export default class Slime extends Phaser.GameObjects.Sprite
